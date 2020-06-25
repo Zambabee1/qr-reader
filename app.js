@@ -73,5 +73,5 @@ async function read() {
     resultClose.addEventListener("click", () => {
         result.style.display = "none";
         read();
-    },{once: true})
+    },{once: true});
 }
