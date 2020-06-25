@@ -15,6 +15,15 @@ navigator.mediaDevices.getUserMedia({
     video.srcObject = stream;
     return video.play();
 }).then(() => {
+    calculateSizes();
+    requestAnimationFrame(render);
+    read();
+})
+.catch(reason => console.error(reason));
+
+window.addEventListener('resize', () => calculateSizes());
+
+function calculateSizes() {
     preview.width = video.videoWidth;
     preview.height = video.videoHeight;
 
@@ -31,11 +40,7 @@ navigator.mediaDevices.getUserMedia({
 
     scopeSize.x = preview.width / 2 - scopeSize.width / 2;
     scopeSize.y = preview.height / 2 - scopeSize.height / 2;
-
-    requestAnimationFrame(render);
-    read();
-})
-.catch(reason => console.error(reason));
+}
 
 function render() {
     const ctx = preview.getContext("2d");
