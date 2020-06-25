@@ -12,11 +12,11 @@ let scopeSize = {};
 navigator.mediaDevices.getUserMedia({
     video: true
 }).then(stream => {
-    video.srcObject = stream
-
-    const {width,height} = stream.getVideoTracks()[0].getSettings();
-    preview.width = width;
-    preview.height = height;
+    video.srcObject = stream;
+    return video.play();
+}).then(() => {
+    preview.width = video.videoWidth;
+    preview.height = video.videoHeight;
 
     if (preview.width > preview.height) {
         scopeSize.height = preview.height / 2;
@@ -32,9 +32,7 @@ navigator.mediaDevices.getUserMedia({
     scopeSize.x = preview.width / 2 - scopeSize.width / 2;
     scopeSize.y = preview.height / 2 - scopeSize.height / 2;
 
-    return video.play();
-}).then(() => {
-    requestAnimationFrame(render)
+    requestAnimationFrame(render);
     read();
 })
 .catch(reason => console.error(reason));
