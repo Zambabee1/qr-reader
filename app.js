@@ -10,7 +10,7 @@ const resultClose = document.getElementById("result-close");
 let scopeSize = {};
 
 navigator.mediaDevices.getUserMedia({
-    video: true
+    video: { facingMode: "environment" },
 }).then(stream => {
     video.srcObject = stream;
     return video.play();
