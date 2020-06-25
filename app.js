@@ -27,12 +27,16 @@ function calculateSizes() {
     preview.width = video.videoWidth;
     preview.height = video.videoHeight;
 
-    if (preview.width > preview.height) {
+    // Set scope size based on the longest canvas side
+    if (preview.width < preview.height) {
         scopeSize.height = preview.height / 2;
-        scopeSize.width = scopeSize.height / 3 * 4;
+        scopeSize.width = Math.min(
+            scopeSize.height / 3 * 4, // 4:3
+            preview.width - 40 // Maximum width
+        );
     } else {
         scopeSize.width = preview.width / 2;
-        scopeSize.height = scopeSize.width / 4 * 3;
+        scopeSize.height = scopeSize.width / 4 * 3; // 3:4
     }
 
     scope.width = scopeSize.width;
