@@ -1,4 +1,10 @@
-const codeReader = new ZXing.BrowserMultiFormatReader();
+const hints = new Map();
+const formats = [ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.QR_CODE];
+
+hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+ 
+const codeReader = new ZXing.BrowserMultiFormatReader(hints);
 
 const video = document.createElement("video");
 const preview = document.getElementById("preview");
