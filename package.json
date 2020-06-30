@@ -21,7 +21,7 @@
     "type": "git",
     "url": "git+https://github.com/zambabee1/qr-reader.git"
   },
-  "author": "",
+  "author": "Samu Nykänen",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/zambabee1/qr-reader/issues"
