@@ -18,30 +18,13 @@
         #preview {
             max-width: 100%;
         }
-        #result {
-            position: absolute;
-            background-color: rgba(0,0,0,.8);
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
         #container {
             position: relative;
-        }
-        #result-close {
-            float: right;
-        }
-        #result-text {
-            color: antiquewhite;
         }
     </style>
 </head>
 <body>
     <div id="container">
-        <div id="result">
-            <span id="result-text"></span>
-            <button id="result-close">X</button>
-        </div>
         <canvas id="preview"></canvas>
     </div>
 
@@ -52,7 +35,7 @@
         });
         reader.read()
             .then(result => {
-                console.log(result);
+                document.write(result);
                 reader.destroy();
             })
             .catch(reason => console.error(reason));
