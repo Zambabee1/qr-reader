@@ -2,13 +2,14 @@ const hints = new Map();
 const formats = [ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.QR_CODE];
 
 hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
  
 const codeReader = new ZXing.BrowserMultiFormatReader(hints);
 
 const video = document.createElement("video");
 const preview = document.getElementById("preview");
 const scope = document.createElement("canvas");
+const previewCtx = preview.getContext("2d");
+const scopeCtx = scope.getContext("2d");
 const result = document.getElementById("result");
 const resultText = document.getElementById("result-text");
 const resultClose = document.getElementById("result-close");
@@ -53,24 +54,20 @@ function calculateSizes() {
 }
 
 function render() {
-    const ctx = preview.getContext("2d");
-    ctx.drawImage(video,0,0);
-
-    const scopeCtx = scope.getContext("2d");
     scopeCtx.drawImage(video,scopeSize.x,scopeSize.y,scopeSize.width,scopeSize.height,0,0,scopeSize.width,scopeSize.height);
+    previewCtx.drawImage(video,0,0);
 
-    ctx.beginPath();
-    ctx.rect(scopeSize.x,scopeSize.y,scopeSize.width,scopeSize.height);
-    ctx.closePath();
-    ctx.strokeStyle = "#75ff75";
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    previewCtx.beginPath();
+    previewCtx.rect(scopeSize.x,scopeSize.y,scopeSize.width,scopeSize.height);
+    previewCtx.closePath();
+    previewCtx.strokeStyle = "#75ff75";
+    previewCtx.lineWidth = 2;
+    previewCtx.stroke();
 
     requestAnimationFrame(render);
 }
 
 async function read() {
-    scope.getContext("2d");
     const stream = scope.captureStream();
     const decodeResult = await codeReader.decodeOnceFromStream(stream);
     result.style.display = "block";
