@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Code Reader</title>
     <style>
         html,body {
             height: 100%;
@@ -45,7 +45,14 @@
         <canvas id="preview"></canvas>
     </div>
 
-    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
-    <script src="app.js"></script>
+    <script src="dist/index.js"></script>
+    <script>
+        const reader = new CodeReader({
+            canvas: document.getElementById("preview"),
+        });
+        reader.read()
+            .then(result => console.log(result))
+            .catch(reason => console.error(reason));
+    </script>
 </body>
 </html>

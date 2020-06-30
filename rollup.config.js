@@ -6,7 +6,7 @@ export default {
     output: {
         file: 'dist/index.js',
         format: 'umd',
-        name: 'BarcodeReader',
+        name: 'CodeReader',
     },
     plugins: [
         typescript(),
