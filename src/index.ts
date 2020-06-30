@@ -1,7 +1,11 @@
 import {
     BarcodeFormat,
     BrowserMultiFormatReader,
-    DecodeHintType
+    DecodeHintType,
+    HTMLCanvasElementLuminanceSource,
+    HybridBinarizer,
+    BinaryBitmap,
+    Result
 } from "@zxing/library/esm/index";
 
 interface CodeReaderOptions {
@@ -15,7 +19,13 @@ interface Rectangle {
     h: number;
 };
 
-export class CodeReader {
+function wait(ms: number) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms);
+    });
+}
+
+export default class CodeReader {
     private initialized = false;
 
     private video: HTMLVideoElement;
@@ -47,13 +57,15 @@ export class CodeReader {
         this.video.srcObject = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" },
         });
-           
+
         await this.video.play();
         
         this.calculateSizes();
-        requestAnimationFrame(this.render);
+        requestAnimationFrame(() => this.render());
         
         window.addEventListener('resize', () => this.calculateSizes());
+
+        this.initialized = true;
     }
 
     private calculateSizes() {
@@ -92,7 +104,24 @@ export class CodeReader {
         this.previewCtx.lineWidth = 2;
         this.previewCtx.stroke();
 
-        requestAnimationFrame(this.render);
+        requestAnimationFrame(() => this.render());
+    }
+
+    private async decode() {
+        const luminanceSource = new HTMLCanvasElementLuminanceSource(this.scope);
+        const hybridBinarizer = new HybridBinarizer(luminanceSource);
+        const binaryBitmap = new BinaryBitmap(hybridBinarizer);
+        try {
+            const result = this.codeReader.decodeBitmap(binaryBitmap);
+            return result;
+        } catch (error) {
+            if (error.name == 'NotFoundException') {
+                await wait(1000);
+                return this.decode();
+            } else {
+                throw error;
+            }
+        }
     }
 
     async read() {
@@ -100,9 +129,7 @@ export class CodeReader {
             await this.init();
         }
 
-        const stream = this.scope.captureStream();
-        const decodeResult = await this.codeReader.decodeOnceFromStream(stream);
-
-        return decodeResult.text;  
+        const result = await this.decode();
+        return result.getText();
     }
 }
