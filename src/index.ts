@@ -12,12 +12,20 @@ interface CodeReaderOptions {
     canvas: HTMLCanvasElement;
 }
 
+interface CodeReaderConstructor {
+    new (opts: CodeReaderOptions): CodeReader;
+}
+
 interface Rectangle {
     x: number;
     y: number;
     w: number;
     h: number;
 };
+
+declare global {
+    const CodeReader: CodeReaderConstructor;
+}
 
 function wait(ms: number) {
     return new Promise(resolve => {
@@ -117,7 +125,7 @@ export default class CodeReader {
         }
     }
 
-    private async decode() {
+    private async decode(): Promise<Result> {
         const luminanceSource = new HTMLCanvasElementLuminanceSource(this.scope);
         const hybridBinarizer = new HybridBinarizer(luminanceSource);
         const binaryBitmap = new BinaryBitmap(hybridBinarizer);
