@@ -16,13 +16,7 @@ interface Rectangle {
 };
 
 export class CodeReader {
-    private video;
-    private preview;
-    private scope;
-    private previewCtx;
-    private scopeCtx;
-    private scopeSize;
-    private codeReader;
+    private initialized = false;
 
     private video: HTMLVideoElement;
     private preview: HTMLCanvasElement;
@@ -102,6 +96,10 @@ export class CodeReader {
     }
 
     async read() {
+        if (!this.initialized) {
+            await this.init();
+        }
+
         const stream = this.scope.captureStream();
         const decodeResult = await this.codeReader.decodeOnceFromStream(stream);
 
