@@ -35,6 +35,7 @@ export default class CodeReader {
     private scopeCtx: CanvasRenderingContext2D;
     private scopeRect: Rectangle;
     private codeReader: BrowserMultiFormatReader;
+    private resizeListener: () => void;
 
     constructor(opts: CodeReaderOptions) {
         this.video = document.createElement("video");
@@ -63,9 +64,16 @@ export default class CodeReader {
         this.calculateSizes();
         requestAnimationFrame(() => this.render());
         
-        window.addEventListener('resize', () => this.calculateSizes());
+        this.resizeListener = () => this.calculateSizes(); 
+        window.addEventListener('resize', this.resizeListener);
 
         this.initialized = true;
+    }
+
+    destroy() {
+        window.removeEventListener('resize', this.resizeListener);
+        this.initialized = false;
+        this.video.pause();
     }
 
     private calculateSizes() {
@@ -104,7 +112,9 @@ export default class CodeReader {
         this.previewCtx.lineWidth = 2;
         this.previewCtx.stroke();
 
-        requestAnimationFrame(() => this.render());
+        if(this.initialized) {
+            requestAnimationFrame(() => this.render());
+        }
     }
 
     private async decode() {
@@ -117,7 +127,9 @@ export default class CodeReader {
         } catch (error) {
             if (error.name == 'NotFoundException') {
                 await wait(1000);
-                return this.decode();
+                if(this.initialized) {
+                    return this.decode();
+                }
             } else {
                 throw error;
             }
