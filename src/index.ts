@@ -10,10 +10,12 @@ import {
 
 interface CodeReaderOptions {
     canvas: HTMLCanvasElement;
+    formats?: BarcodeFormat[];
 }
 
 interface CodeReaderConstructor {
     new (opts: CodeReaderOptions): CodeReader;
+    formats: typeof BarcodeFormat;
 }
 
 interface Rectangle {
@@ -34,8 +36,10 @@ function wait(ms: number) {
 }
 
 export default class CodeReader {
-    private initialized = false;
+    static formats = BarcodeFormat;
 
+    private initialized = false;
+    private formats: BarcodeFormat[];
     private video: HTMLVideoElement;
     private preview: HTMLCanvasElement;
     private scope: HTMLCanvasElement;
@@ -46,6 +50,11 @@ export default class CodeReader {
     private resizeListener: () => void;
 
     constructor(opts: CodeReaderOptions) {
+        this.formats = opts.formats || [
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.QR_CODE,
+        ];
         this.video = document.createElement("video");
         this.preview = opts.canvas;
         this.scope = document.createElement("canvas");
@@ -55,12 +64,7 @@ export default class CodeReader {
     
     async init () {
         const hints = new Map();
-        const formats = [
-            BarcodeFormat.EAN_8,
-            BarcodeFormat.EAN_13,
-            BarcodeFormat.QR_CODE,
-        ];
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, this.formats);
         this.codeReader = new BrowserMultiFormatReader(hints);
 
         this.video.srcObject = await navigator.mediaDevices.getUserMedia({

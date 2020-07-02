@@ -30,9 +30,13 @@
 
     <script src="dist/index.js"></script>
     <script>
+        const { EAN_8, EAN_13, QR_CODE } = CodeReader.formats;
+
         const reader = new CodeReader({
             canvas: document.getElementById("preview"),
+            formats: [EAN_8, EAN_13, QR_CODE],
         });
+        
         reader.read()
             .then(result => {
                 document.write(result);
