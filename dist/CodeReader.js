@@ -20318,6 +20318,34 @@
             this.scope = document.createElement("canvas");
             this.previewCtx = this.preview.getContext("2d");
             this.scopeCtx = this.scope.getContext("2d");
+            this.scopeOptions = opts.scope;
+            switch (opts.scope.style) {
+                default:
+                case "rect":
+                    this.drawFunction = this.drawRect;
+                    break;
+                case "corner":
+                    this.previewCtx.strokeStyle = opts.scope.color;
+                    this.previewCtx.lineWidth = opts.scope.lineWidth;
+                    this.drawFunction = this.drawCorner;
+                    break;
+                case "shelf":
+                    this.previewCtx.strokeStyle = opts.scope.color;
+                    this.previewCtx.lineWidth = opts.scope.lineWidth;
+                    this.drawFunction = this.drawShelf;
+                    break;
+                case "line":
+                    this.previewCtx.strokeStyle = opts.scope.color;
+                    this.previewCtx.lineWidth = opts.scope.lineWidth;
+                    this.drawFunction = this.drawLine;
+                    break;
+                case "custom":
+                    this.drawFunction = opts.scope.drawFunction;
+                    break;
+                case "none":
+                    this.drawFunction = function () { };
+                    break;
+            }
         }
         CodeReader.prototype.init = function () {
             return __awaiter(this, void 0, void 0, function () {
@@ -20359,31 +20387,26 @@
             // Set scope rectangle based on the longest canvas side
             this.scopeRect = { x: 0, y: 0, w: 0, h: 0 };
             if (this.preview.width < this.preview.height) {
-                this.scopeRect.h = this.preview.height / 2;
-                this.scopeRect.w = Math.min(this.scopeRect.h / 3 * 4, // 4:3
+                this.scopeRect.h = Math.round(this.preview.height / 2);
+                this.scopeRect.w = Math.round(Math.min(this.scopeRect.h / 3 * 4, // 4:3
                 this.preview.width - 40 // Maximum width
-                );
+                ));
             }
             else {
-                this.scopeRect.w = this.preview.width / 2;
-                this.scopeRect.h = this.scopeRect.w / 4 * 3; // 3:4
+                this.scopeRect.w = Math.round(this.preview.width / 2);
+                this.scopeRect.h = Math.round(this.scopeRect.w / 4 * 3); // 3:4
             }
             this.scope.width = this.scopeRect.w;
             this.scope.height = this.scopeRect.h;
-            this.scopeRect.x = this.preview.width / 2 - this.scopeRect.w / 2;
-            this.scopeRect.y = this.preview.height / 2 - this.scopeRect.h / 2;
+            this.scopeRect.x = Math.round(this.preview.width / 2 - this.scopeRect.w / 2);
+            this.scopeRect.y = Math.round(this.preview.height / 2 - this.scopeRect.h / 2);
         };
         CodeReader.prototype.render = function () {
             var _this = this;
             var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
             this.scopeCtx.drawImage(this.video, x, y, w, h, 0, 0, w, h);
             this.previewCtx.drawImage(this.video, 0, 0);
-            this.previewCtx.beginPath();
-            this.previewCtx.rect(x, y, w, h);
-            this.previewCtx.closePath();
-            this.previewCtx.strokeStyle = "#75ff75";
-            this.previewCtx.lineWidth = 2;
-            this.previewCtx.stroke();
+            this.drawFunction(this.previewCtx);
             if (this.initialized) {
                 requestAnimationFrame(function () { return _this.render(); });
             }
@@ -20437,6 +20460,95 @@
                     }
                 });
             });
+        };
+        CodeReader.prototype.drawRect = function () {
+            if (this.scopeOptions.style != "rect") {
+                return;
+            }
+            var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+            this.previewCtx.beginPath();
+            this.previewCtx.strokeStyle = this.scopeOptions.color || "#75ff75";
+            this.previewCtx.lineWidth = this.scopeOptions.lineWidth || 2;
+            this.previewCtx.rect(x, y, w, h);
+            this.previewCtx.stroke();
+        };
+        CodeReader.prototype.drawCorner = function () {
+            if (this.scopeOptions.style != "corner") {
+                return;
+            }
+            var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+            var length = this.scopeOptions.length || 30;
+            var topLeft = {
+                x: x,
+                y: y
+            };
+            var topRight = {
+                x: x + w,
+                y: y
+            };
+            var bottomLeft = {
+                x: x,
+                y: y + h
+            };
+            var bottomRight = {
+                x: x + w,
+                y: y + h
+            };
+            this.previewCtx.beginPath();
+            this.previewCtx.strokeStyle = this.scopeOptions.color || "#75ff75";
+            this.previewCtx.lineWidth = this.scopeOptions.lineWidth || 2;
+            this.previewCtx.moveTo(topLeft.x, topLeft.y);
+            this.previewCtx.lineTo(topLeft.x + length, topLeft.y);
+            this.previewCtx.moveTo(topLeft.x, topLeft.y);
+            this.previewCtx.lineTo(topLeft.x, topLeft.y + length);
+            this.previewCtx.moveTo(topRight.x, topRight.y);
+            this.previewCtx.lineTo(topRight.x - length, topRight.y);
+            this.previewCtx.moveTo(topRight.x, topRight.y);
+            this.previewCtx.lineTo(topRight.x, topRight.y + length);
+            this.previewCtx.moveTo(bottomLeft.x, bottomLeft.y);
+            this.previewCtx.lineTo(bottomLeft.x + length, bottomLeft.y);
+            this.previewCtx.moveTo(bottomLeft.x, bottomLeft.y);
+            this.previewCtx.lineTo(bottomLeft.x, bottomLeft.y - length);
+            this.previewCtx.moveTo(bottomRight.x, bottomRight.y);
+            this.previewCtx.lineTo(bottomRight.x - length, bottomRight.y);
+            this.previewCtx.moveTo(bottomRight.x, bottomRight.y);
+            this.previewCtx.lineTo(bottomRight.x, bottomRight.y - length);
+            this.previewCtx.stroke();
+        };
+        CodeReader.prototype.drawShelf = function () {
+            if (this.scopeOptions.style != "shelf") {
+                return;
+            }
+            var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+            var length = this.scopeOptions.length || 30;
+            var bottomLeft = {
+                x: x,
+                y: y + h
+            };
+            var bottomRight = {
+                x: x + w,
+                y: y + h
+            };
+            this.previewCtx.beginPath();
+            this.previewCtx.strokeStyle = this.scopeOptions.color || "#75ff75";
+            this.previewCtx.lineWidth = this.scopeOptions.lineWidth || 2;
+            this.previewCtx.moveTo(bottomLeft.x, bottomLeft.y - length);
+            this.previewCtx.lineTo(bottomLeft.x, bottomLeft.y);
+            this.previewCtx.lineTo(bottomRight.x, bottomRight.y);
+            this.previewCtx.lineTo(bottomRight.x, bottomRight.y - length);
+            this.previewCtx.stroke();
+        };
+        CodeReader.prototype.drawLine = function () {
+            if (this.scopeOptions.style != "line") {
+                return;
+            }
+            var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
+            this.previewCtx.beginPath();
+            this.previewCtx.strokeStyle = this.scopeOptions.color || "#75ff75";
+            this.previewCtx.lineWidth = this.scopeOptions.lineWidth || 2;
+            this.previewCtx.moveTo(x, y + h / 2);
+            this.previewCtx.lineTo(x + w, y + h / 2);
+            this.previewCtx.stroke();
         };
         CodeReader.formats = BarcodeFormat$1;
         return CodeReader;

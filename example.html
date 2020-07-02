@@ -28,13 +28,19 @@
         <canvas id="preview"></canvas>
     </div>
 
-    <script src="dist/index.js"></script>
+    <script src="dist/CodeReader.js"></script>
     <script>
         const { EAN_8, EAN_13, QR_CODE } = CodeReader.formats;
 
         const reader = new CodeReader({
             canvas: document.getElementById("preview"),
             formats: [EAN_8, EAN_13, QR_CODE],
+            scope: {
+                style: "corner",
+                lineWidth: 8,
+                color: "rgba(0,255,0,0.5)",
+                length: 50 
+            }
         });
         
         reader.read()
