@@ -1,12 +1,9 @@
 import {
     BarcodeFormat,
-    BrowserMultiFormatReader,
-    DecodeHintType,
-    HTMLCanvasElementLuminanceSource,
-    HybridBinarizer,
-    BinaryBitmap,
-    Result
+    Result,
 } from "@zxing/library/esm/index";
+
+import decoderCode from './decoder';
 
 interface CodeReaderOptions {
     canvas: HTMLCanvasElement;
@@ -90,9 +87,9 @@ export default class CodeReader {
         LineScopeOptions | 
         CustomScopeOptions |
         NoneScopeOptions;
-    private codeReader: BrowserMultiFormatReader;
     private resizeListener: () => void;
     private drawFunction: (ctx: CanvasRenderingContext2D) => void;
+    private decodeWorker;
 
     constructor(opts: CodeReaderOptions) {
         this.formats = opts.formats || [
@@ -106,6 +103,9 @@ export default class CodeReader {
         this.previewCtx = this.preview.getContext("2d");
         this.scopeCtx = this.scope.getContext("2d");
         this.scopeOptions = opts.scope;
+
+        const decoderBlob = new Blob([atob(decoderCode)], { type: 'application/javascript' });
+        this.decodeWorker = new Worker(URL.createObjectURL(decoderBlob));
 
         switch(opts.scope.style)
         {
@@ -138,9 +138,10 @@ export default class CodeReader {
     }
     
     async init () {
-        const hints = new Map();
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, this.formats);
-        this.codeReader = new BrowserMultiFormatReader(hints);
+        this.decodeWorker.sendMessage({
+            type: 'init',
+            formats: this.formats,
+        });
 
         this.video.srcObject = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" },
@@ -200,22 +201,8 @@ export default class CodeReader {
     }
 
     private async decode(): Promise<Result> {
-        const luminanceSource = new HTMLCanvasElementLuminanceSource(this.scope);
-        const hybridBinarizer = new HybridBinarizer(luminanceSource);
-        const binaryBitmap = new BinaryBitmap(hybridBinarizer);
-        try {
-            const result = this.codeReader.decodeBitmap(binaryBitmap);
-            return result;
-        } catch (error) {
-            if (error.name == 'NotFoundException') {
-                await wait(1000);
-                if(this.initialized) {
-                    return this.decode();
-                }
-            } else {
-                throw error;
-            }
-        }
+        // TODO: Implement with worker
+        return null;
     }
 
     async read() {

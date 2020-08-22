@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
 import resolve from '@rollup/plugin-node-resolve';
+import { base64 } from 'rollup-plugin-base64';
 
 export default {
     input: 'src/CodeReader.ts',
@@ -10,7 +11,8 @@ export default {
         sourcemap: true,
     },
     plugins: [
-        typescript(),
         resolve(),
+        typescript(),
+        base64({ include: 'src/decoder.js' }),
     ],
 };

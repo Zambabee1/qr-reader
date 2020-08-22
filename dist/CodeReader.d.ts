@@ -47,9 +47,9 @@ export default class CodeReader {
     private scopeCtx;
     private scopeRect;
     private scopeOptions;
-    private codeReader;
     private resizeListener;
     private drawFunction;
+    private decodeWorker;
     constructor(opts: CodeReaderOptions);
     init(): Promise<void>;
     destroy(): void;
