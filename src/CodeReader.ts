@@ -79,6 +79,7 @@ export default class CodeReader {
     private initialized = false;
     private formats: BarcodeFormat[];
     private video: HTMLVideoElement;
+    private stream: MediaStream;
     private preview: HTMLCanvasElement;
     private scope: HTMLCanvasElement;
     private previewCtx: CanvasRenderingContext2D;
@@ -142,7 +143,7 @@ export default class CodeReader {
         hints.set(DecodeHintType.POSSIBLE_FORMATS, this.formats);
         this.codeReader = new BrowserMultiFormatReader(hints);
 
-        this.video.srcObject = await navigator.mediaDevices.getUserMedia({
+        this.stream = this.video.srcObject = await navigator.mediaDevices.getUserMedia({
             video: { facingMode: "environment" },
         });
 
@@ -161,6 +162,13 @@ export default class CodeReader {
         window.removeEventListener('resize', this.resizeListener);
         this.initialized = false;
         this.video.pause();
+        this.video.remove();
+        this.scope.remove();
+        if(this.stream) {
+            this.stream.getTracks().forEach(function(track){
+                track.stop();
+            });
+        }
     }
 
     private calculateSizes() {
@@ -224,7 +232,7 @@ export default class CodeReader {
         }
 
         const result = await this.decode();
-        return result.getText();
+        return result?.getText();
     }
 
     private drawRect() {

@@ -20349,23 +20349,24 @@
         }
         CodeReader.prototype.init = function () {
             return __awaiter(this, void 0, void 0, function () {
-                var hints, _a;
+                var hints, _a, _b;
                 var _this = this;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
                         case 0:
                             hints = new Map();
                             hints.set(DecodeHintType$1.POSSIBLE_FORMATS, this.formats);
                             this.codeReader = new BrowserMultiFormatReader(hints);
-                            _a = this.video;
+                            _a = this;
+                            _b = this.video;
                             return [4 /*yield*/, navigator.mediaDevices.getUserMedia({
                                     video: { facingMode: "environment" }
                                 })];
                         case 1:
-                            _a.srcObject = _b.sent();
+                            _a.stream = _b.srcObject = _c.sent();
                             return [4 /*yield*/, this.video.play()];
                         case 2:
-                            _b.sent();
+                            _c.sent();
                             this.calculateSizes();
                             requestAnimationFrame(function () { return _this.render(); });
                             this.resizeListener = function () { return _this.calculateSizes(); };
@@ -20380,6 +20381,13 @@
             window.removeEventListener('resize', this.resizeListener);
             this.initialized = false;
             this.video.pause();
+            this.video.remove();
+            this.scope.remove();
+            if (this.stream) {
+                this.stream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+            }
         };
         CodeReader.prototype.calculateSizes = function () {
             this.preview.width = this.video.videoWidth;
@@ -20456,7 +20464,7 @@
                         case 2: return [4 /*yield*/, this.decode()];
                         case 3:
                             result = _a.sent();
-                            return [2 /*return*/, result.getText()];
+                            return [2 /*return*/, result === null || result === void 0 ? void 0 : result.getText()];
                     }
                 });
             });

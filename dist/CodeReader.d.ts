@@ -41,6 +41,7 @@ export default class CodeReader {
     private initialized;
     private formats;
     private video;
+    private stream;
     private preview;
     private scope;
     private previewCtx;
