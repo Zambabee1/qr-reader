@@ -108,6 +108,11 @@ export default class CodeReader {
         this.scopeCtx = this.scope.getContext("2d");
         this.scopeOptions = opts.scope;
 
+        // For iOS Safari support
+        this.video.muted = true;
+        // @ts-ignore
+        this.video.playsInline = true;
+
         switch(opts.scope.style)
         {
             default:

@@ -20319,6 +20319,10 @@
             this.previewCtx = this.preview.getContext("2d");
             this.scopeCtx = this.scope.getContext("2d");
             this.scopeOptions = opts.scope;
+            // For iOS Safari support
+            this.video.muted = true;
+            // @ts-ignore
+            this.video.playsInline = true;
             switch (opts.scope.style) {
                 default:
                 case "rect":
@@ -20411,6 +20415,7 @@
         };
         CodeReader.prototype.render = function () {
             var _this = this;
+            console.log('render');
             var _a = this.scopeRect, x = _a.x, y = _a.y, w = _a.w, h = _a.h;
             this.scopeCtx.drawImage(this.video, x, y, w, h, 0, 0, w, h);
             this.previewCtx.drawImage(this.video, 0, 0);
