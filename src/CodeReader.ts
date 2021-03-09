@@ -1,12 +1,15 @@
 import {
     BarcodeFormat,
-    BrowserMultiFormatReader,
     DecodeHintType,
-    HTMLCanvasElementLuminanceSource,
     HybridBinarizer,
     BinaryBitmap,
     Result
 } from "@zxing/library/esm/index";
+
+import {
+    BrowserMultiFormatReader,
+    HTMLCanvasElementLuminanceSource,
+} from "@zxing/browser/esm/index";
 
 interface CodeReaderOptions {
     canvas: HTMLCanvasElement;
