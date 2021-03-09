@@ -109,9 +109,14 @@ export default class CodeReader {
         this.scopeOptions = opts.scope;
 
         // For iOS Safari support
-        this.video.muted = true;
         // @ts-ignore
         this.video.playsInline = true;
+        this.video.muted = true;
+        this.video.style.transform = 'scale(0.0001, 0.0001)';
+        this.video.style.position = 'fixed';
+        this.video.style.bottom = '0';
+        this.video.style.right = '0';
+        document.body.appendChild(this.video);
 
         switch(opts.scope.style)
         {
